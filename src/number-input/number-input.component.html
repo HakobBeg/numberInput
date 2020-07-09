@@ -1,0 +1,16 @@
+<div>
+  <div>
+    <label> <input #input (keypress)="onKeypressHandler($event)" [(ngModel)]="inputValue"
+                   *ngIf="!isReadonly; else readonlyMode" [disabled]="isDisabled"
+                   type="text"
+                   [placeholder]="(isDisabled)?'Input is disabled':'Type number'"/></label>
+    <br>
+  </div>
+
+  <ng-template #readonlyMode>
+    <label>{{'test'}}</label>
+  </ng-template>
+
+  <span style="color: red">{{errorMessage}}</span>
+
+</div>
