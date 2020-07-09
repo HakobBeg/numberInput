@@ -54,6 +54,20 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
   ngOnChanges(changes: SimpleChanges) {
     this.configValidator();
     this.formatterService.config(this.groupSeparator, this.decimalSeparator);
+    let tmpValue = this.formatterService.parse(this.value);
+    if (this.validatorService.validate(tmpValue)) {
+      tmpValue = this.formatterService.format(tmpValue);
+      this.errorMessage = '';
+      this.inputValue = tmpValue;
+      if (!this.readonly) {
+        setTimeout(() => {
+          this.valueChange.emit(this.formatterService.parse(this.inputValue));
+        }, 0)
+        ;
+      }
+    } else {
+      this.errorMessage = 'Somthing is wrong, please check the conditions!';
+    }
   }
 
   ngAfterViewInit() {
@@ -65,7 +79,6 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
           if (this.validatorService.validate(tmpValue)) {
             tmpValue = this.formatterService.format(tmpValue);
             this.errorMessage = '';
-            tmpValue = this.formatterService.format(tmpValue);
             if (!this.readonly) {
               this.valueChange.emit(tmpValue);
             }
