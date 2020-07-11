@@ -6,11 +6,8 @@
                    [placeholder]="(isDisabled)?'Input is disabled':'Type number'"/></label>
     <br>
   </div>
-
   <ng-template #readonlyMode>
     <label>{{(inputValue)?inputValue:'ReadOnly Mode'}}</label>
   </ng-template>
-
   <span style="color: red">{{errorMessage}}</span>
-
 </div>
