@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
 
-  editableModeValue = '0';
+  editableModeValue = 1;
 
 
 }

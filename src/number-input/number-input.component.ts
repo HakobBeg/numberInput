@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {ValidatorService} from '../services/validator.service';
 import {FormatterService} from '../services/formatter.service';
-import {fromEvent, Observable, timer} from 'rxjs';
+import {fromEvent, Observable, Subject, timer} from 'rxjs';
 import {debounce, tap} from 'rxjs/operators';
 
 @Component({
@@ -20,6 +20,7 @@ import {debounce, tap} from 'rxjs/operators';
   styleUrls: ['./number-input.component.css'],
   providers: [ValidatorService, FormatterService]
 })
+
 export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
 
 
@@ -35,11 +36,12 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
 
   public errorMessage = '';
 
-  @Input() public value: string;
-  @Output() public valueChange = new EventEmitter<string>();
+  @Input() public value: number;
+  @Output() public valueChange = new EventEmitter<number>();
 
 
   private keyupEventEmitter$: Observable<KeyboardEvent>;
+  private valueChecker$ = new Subject<string>();
   @ViewChild('input') private inputElement: ElementRef;
 
   constructor(private validatorService: ValidatorService, private formatterService: FormatterService) {
@@ -47,27 +49,46 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.configValidator();
+
+    this.validatorService.config(`^[-]?\\d*?\\${this.decimalSeparator}?\\d*$`,
+      this.decimalSeparator,
+      this.fractionDigits,
+      this.min,
+      this.max);
+
     this.formatterService.config(this.groupSeparator, this.decimalSeparator);
+
+    this.valueChecker$.subscribe((value) => {
+      if (this.validatorService.validate(value)) {
+        if (!this.readonly) {
+          if (value) {
+            this.valueChange.emit(parseFloat(value));
+          }
+        }
+        value = this.formatterService.format(value);
+        this.errorMessage = '';
+        this.inputValue = value;
+      } else {
+        this.errorMessage = 'Something is wrong, please check the conditions!';
+      }
+    });
+
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.configValidator();
-    this.formatterService.config(this.groupSeparator, this.decimalSeparator);
-    let tmpValue = this.formatterService.parse(this.value);
-    if (this.validatorService.validate(tmpValue)) {
-      tmpValue = this.formatterService.format(tmpValue);
-      this.errorMessage = '';
-      this.inputValue = tmpValue;
-      if (!this.readonly) {
-        setTimeout(() => {
-          this.valueChange.emit(this.formatterService.parse(this.inputValue));
-        }, 0)
-        ;
-      }
-    } else {
-      this.errorMessage = 'Somthing is wrong, please check the conditions!';
+    if (changes.hasOwnProperty('value')) {
+      setTimeout(() => {
+        this.valueChecker$.next(this.value.toString());
+      }, 0);
     }
+
+    this.validatorService.config(`^[-]?\\d*?\\${this.decimalSeparator}?\\d*$`,
+      this.decimalSeparator,
+      this.fractionDigits,
+      this.min,
+      this.max);
+    this.formatterService.config(this.groupSeparator, this.decimalSeparator);
+
   }
 
   ngAfterViewInit() {
@@ -75,31 +96,14 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
     this.keyupEventEmitter$.pipe(
       debounce(() => timer(this.milliSeconds)),
       tap((event: KeyboardEvent) => {
-          let tmpValue = this.formatterService.parse(this.inputValue);
-          if (this.validatorService.validate(tmpValue)) {
-            tmpValue = this.formatterService.format(tmpValue);
-            this.errorMessage = '';
-            if (!this.readonly) {
-              this.valueChange.emit(tmpValue);
-            }
-            this.inputValue = tmpValue;
-          } else {
-            this.errorMessage = 'Somthing is wrong, please check the conditions!';
-          }
-
+          this.valueChecker$.next(this.inputValue);
         }
       ),
-    ).subscribe();
+    ).subscribe((event) => {
+      this.valueChecker$.next(this.formatterService.parse(this.inputValue));
+    });
   }
 
-
-  configValidator() {
-    this.validatorService.config(`^[-]?\\d*?\\${this.decimalSeparator}?\\d*$`,
-      this.decimalSeparator,
-      this.fractionDigits,
-      this.min,
-      this.max);
-  }
 
   get isDisabled(): boolean {
     return this.disabled;
