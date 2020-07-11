@@ -35,6 +35,7 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() public inputValue = '';
 
   public errorMessage = '';
+  public oldValue: string;
 
   @Input() public value: number;
   @Output() public valueChange = new EventEmitter<number>();
@@ -121,5 +122,14 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
     }
   }
 
+  onFocus() {
+    this.oldValue = this.inputValue;
+  }
+
+  onFocusOut() {
+    if (!this.validatorService.validate(this.inputValue)) {
+      this.inputValue = this.oldValue;
+    }
+  }
 
 }

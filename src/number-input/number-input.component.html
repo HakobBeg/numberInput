@@ -1,6 +1,6 @@
 <div>
   <div>
-    <label> <input #input (keypress)="onKeypressHandler($event)"  [(ngModel)]="inputValue"
+    <label> <input #input (focusin)="onFocus()" (focusout)="onFocusOut()" (keypress)="onKeypressHandler($event)"  [(ngModel)]="inputValue"
                    *ngIf="!isReadonly; else readonlyMode" [disabled]="isDisabled"
                    type="text"
                    [placeholder]="(isDisabled)?'Input is disabled':'Type number'"/></label>
