@@ -10,22 +10,21 @@ export class FormatterService {
   private decimalSeparator = '.';
 
 
-  constructor() {
-  }
+  constructor() {  }
 
 
-  config(groupSeparator: string, decimalSeparator: string) {
+  public config(groupSeparator: string, decimalSeparator: string) {
     this.decimalSeparator = decimalSeparator;
     this.groupSeparator = groupSeparator;
 
   }
 
-  addGroupSeparatorToNumber(expression: string): string {
+  private addGroupSeparatorToNumber(expression: string): string {
     return expression.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, this.groupSeparator);
   }
 
 
-  setZero(expression: string): string {
+  private setZero(expression: string): string {
     const dotIndex = expression.indexOf(this.decimalSeparator);
     if (dotIndex >= 0) {
       if (dotIndex === 0) {
@@ -38,7 +37,7 @@ export class FormatterService {
     return expression;
   }
 
-  removeExcessiveZeroes(expression: string): string {
+  private removeExcessiveZeroes(expression: string): string {
     let sign = '';
     if (expression[0] === '-' || expression[0] === '+') {
       sign = expression[0];
@@ -46,7 +45,7 @@ export class FormatterService {
     }
 
     while (true) {
-      if (expression.startsWith('0') && expression[1] !== '.' && expression.length > 1) {
+      if (expression.startsWith('0') && expression[1] !== this.decimalSeparator && expression.length > 1) {
         expression = expression.slice(1, expression.length);
       } else {
         break;
@@ -56,11 +55,11 @@ export class FormatterService {
   }
 
 
-  format(expression: string): string {
+  public format(expression: string): string {
     return this.addGroupSeparatorToNumber(this.setZero(this.removeExcessiveZeroes(expression)));
   }
 
-  parse(expression: string) {
+  public parse(expression: string) {
     return expression.split(this.groupSeparator).join('');
   }
 

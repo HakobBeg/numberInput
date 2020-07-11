@@ -14,7 +14,7 @@ export class ValidatorService {
   }
 
 
-  config(regExp: string, decimalSeparator: string, fractionDigits: number, min: number, max: number) {
+  public config(regExp: string, decimalSeparator: string, fractionDigits: number, min: number, max: number) {
     this.regularExpression = new RegExp(regExp);
     this.decimalSeparator = decimalSeparator;
     this.fractionDigits = fractionDigits;
@@ -22,11 +22,11 @@ export class ValidatorService {
     this.max = max;
   }
 
-  isSymbolsValid(expression: string): boolean {
+  public isSymbolsValid(expression: string): boolean {
     return this.regularExpression.test(expression);
   }
 
-  isSizeValid(expression: string): boolean {
+  private isSizeValid(expression: string): boolean {
 
     if (this.max) {
       if (this.min) {
@@ -36,14 +36,14 @@ export class ValidatorService {
       }
     } else {
       if (this.min) {
-        return parseFloat(expression) > this.min
+        return parseFloat(expression) > this.min;
       } else {
         return true;
       }
     }
   }
 
-  isFractionDigitsValid(expression: string): boolean {
+  private isFractionDigitsValid(expression: string): boolean {
 
     if (expression.indexOf(this.decimalSeparator) >= 0) {
       return expression.split(this.decimalSeparator)[1].length <= this.fractionDigits;
@@ -52,7 +52,7 @@ export class ValidatorService {
   }
 
 
-  validate(expression: string): boolean {
+  public validate(expression: string): boolean {
     if (expression.length === 0) {
       return true;
     }

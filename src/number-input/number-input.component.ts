@@ -92,16 +92,18 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.keyupEventEmitter$ = fromEvent<KeyboardEvent>(this.inputElement.nativeElement, 'keyup');
-    this.keyupEventEmitter$.pipe(
-      debounce(() => timer(this.milliSeconds)),
-      tap((event: KeyboardEvent) => {
-          this.valueChecker$.next(this.inputValue);
-        }
-      ),
-    ).subscribe((event) => {
-      this.valueChecker$.next(this.formatterService.parse(this.inputValue));
-    });
+    if (!this.readonly) {
+      this.keyupEventEmitter$ = fromEvent<KeyboardEvent>(this.inputElement.nativeElement, 'keyup');
+      this.keyupEventEmitter$.pipe(
+        debounce(() => timer(this.milliSeconds)),
+        tap(() => {
+            this.valueChecker$.next(this.inputValue);
+          }
+        ),
+      ).subscribe(() => {
+        this.valueChecker$.next(this.formatterService.parse(this.inputValue));
+      });
+    }
   }
 
 

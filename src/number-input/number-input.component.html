@@ -8,7 +8,7 @@
   </div>
 
   <ng-template #readonlyMode>
-    <label>{{inputValue}}</label>
+    <label>{{(inputValue)?inputValue:'ReadOnly Mode'}}</label>
   </ng-template>
 
   <span style="color: red">{{errorMessage}}</span>
