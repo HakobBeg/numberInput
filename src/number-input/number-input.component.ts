@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component, ElementRef,
   EventEmitter,
   Input,
@@ -10,7 +9,7 @@ import {
 } from '@angular/core';
 import {ValidatorService} from '../services/validator.service';
 import {FormatterService} from '../services/formatter.service';
-import {fromEvent, Observable, Subject, timer} from 'rxjs';
+import {Subject, timer} from 'rxjs';
 import {debounce, tap} from 'rxjs/operators';
 
 @Component({
@@ -20,7 +19,7 @@ import {debounce, tap} from 'rxjs/operators';
   providers: [ValidatorService, FormatterService]
 })
 
-export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
+export class NumberInputComponent implements OnInit, OnChanges {
 
 
   @Input() private min: number;
@@ -40,7 +39,7 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
   @Output() public valueChange = new EventEmitter<number>();
 
 
-  private keyupEventEmitter$: Observable<KeyboardEvent>;
+  public keyupEventEmitter$ = new Subject<Event>();
   private valueChecker$ = new Subject<string>();
   @ViewChild('input') private inputElement: ElementRef;
 
@@ -49,6 +48,16 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   ngOnInit(): void {
+
+    this.keyupEventEmitter$.pipe(
+      debounce(() => timer(this.milliSeconds)),
+      tap(() => {
+          this.valueChecker$.next(this.inputValue);
+        }
+      ),
+    ).subscribe(() => {
+      this.valueChecker$.next(this.formatterService.parse(this.inputValue));
+    });
 
 
     this.valueChecker$.subscribe((value) => {
@@ -88,20 +97,6 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
     }
   }
 
-  ngAfterViewInit() {
-    if (!this.readonly) {
-      this.keyupEventEmitter$ = fromEvent<KeyboardEvent>(this.inputElement.nativeElement, 'keyup');
-      this.keyupEventEmitter$.pipe(
-        debounce(() => timer(this.milliSeconds)),
-        tap(() => {
-            this.valueChecker$.next(this.inputValue);
-          }
-        ),
-      ).subscribe(() => {
-        this.valueChecker$.next(this.formatterService.parse(this.inputValue));
-      });
-    }
-  }
 
 
   get isDisabled()
