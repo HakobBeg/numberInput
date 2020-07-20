@@ -14,8 +14,8 @@ export class ValidatorService {
   }
 
 
-  public config(regExp: string, decimalSeparator: string, fractionDigits: number, min: number, max: number) {
-    this.regularExpression = new RegExp(regExp);
+  public config( decimalSeparator: string, fractionDigits: number, min: number, max: number) {
+    this.regularExpression = new RegExp(`^[-]?\\d*?\\${decimalSeparator}?\\d*$`);
     this.decimalSeparator = decimalSeparator;
     this.fractionDigits = fractionDigits;
     this.min = min;

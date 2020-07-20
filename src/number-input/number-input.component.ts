@@ -6,7 +6,6 @@ import {
   OnChanges,
   OnInit,
   Output,
-  SimpleChanges,
   ViewChild
 } from '@angular/core';
 import {ValidatorService} from '../services/validator.service';
@@ -51,20 +50,11 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
 
   ngOnInit(): void {
 
-    this.validatorService.config(`^[-]?\\d*?\\${this.decimalSeparator}?\\d*$`,
-      this.decimalSeparator,
-      this.fractionDigits,
-      this.min,
-      this.max);
-
-    this.formatterService.config(this.groupSeparator, this.decimalSeparator);
 
     this.valueChecker$.subscribe((value) => {
       if (this.validatorService.validate(value)) {
-        if (!this.readonly) {
-          if (value) {
-            this.valueChange.emit(parseFloat(value));
-          }
+        if (!this.readonly && value) {
+          this.valueChange.emit(parseFloat(value));
         }
         value = this.formatterService.format(value);
         this.errorMessage = '';
@@ -76,20 +66,26 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
 
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: { groupSeparator, decimalSeparator, fractionDigits, max, min, milliSeconds, value }) {
     if (changes.hasOwnProperty('value')) {
       setTimeout(() => {
         this.valueChecker$.next(this.value.toString());
       }, 0);
     }
+    if (changes.hasOwnProperty('decimalSeparator')
+      || changes.hasOwnProperty('fractionDigits')
+      || changes.hasOwnProperty('min')
+      || changes.hasOwnProperty('max')) {
+      this.validatorService.config(
+        this.decimalSeparator,
+        this.fractionDigits,
+        this.min,
+        this.max);
+    }
+    if (changes.hasOwnProperty('decimalSeparator') || changes.hasOwnProperty('groupSeparator')) {
+      this.formatterService.config(this.groupSeparator, this.decimalSeparator);
 
-    this.validatorService.config(`^[-]?\\d*?\\${this.decimalSeparator}?\\d*$`,
-      this.decimalSeparator,
-      this.fractionDigits,
-      this.min,
-      this.max);
-    this.formatterService.config(this.groupSeparator, this.decimalSeparator);
-
+    }
   }
 
   ngAfterViewInit() {
@@ -108,11 +104,15 @@ export class NumberInputComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
 
-  get isDisabled(): boolean {
+  get isDisabled()
+    :
+    boolean {
     return this.disabled;
   }
 
-  get isReadonly(): boolean {
+  get isReadonly()
+    :
+    boolean {
     return this.readonly;
   }
 
