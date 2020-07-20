@@ -122,8 +122,9 @@ export class NumberInputComponent implements OnInit, OnChanges {
   }
 
   onFocusOut() {
-    if (!this.validatorService.validate(this.inputValue)) {
+    if (!this.validatorService.validate(this.formatterService.parse(this.inputValue))) {
       this.inputValue = this.oldValue;
+      this.valueChange.emit(parseFloat(this.oldValue));
     }
   }
 
